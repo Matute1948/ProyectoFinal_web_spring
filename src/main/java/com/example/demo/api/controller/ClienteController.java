@@ -55,16 +55,27 @@ public ResponseEntity<Cliente> actualizar(@RequestBody Cliente cliente, @PathVar
 
 
 
-  // http://localhost:8080/API/v1.0/Budget/clientes/nuevo
-  @PostMapping(path = "/cliente",produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<Cliente> agregar(@RequestBody Cliente cliente) {
-      cliente.setRegistro("Cliente (C)");
-      this.clienteService.guardar(cliente);    
-      
-      HttpHeaders cabeceras = new HttpHeaders();
-      cabeceras.add("mensaje_201", "Corresponde a la agregacion del recurso");
-      return new ResponseEntity<>(cliente, cabeceras, 201);
-  }
+  // http://localhost:8082/API/v1.0/Concesionario/clientes/cliente
+	@PostMapping(path = "/cliente", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Object> agregarCliente(@RequestBody Cliente cliente) {
+	    // Verificar que la cédula tenga 10 caracteres
+	    if (cliente.getCedula().length() != 10) {
+	        return new ResponseEntity<>("La cédula debe tener 10 caracteres", HttpStatus.BAD_REQUEST);
+	    }
+ 
+	 // Verificar si la cédula ya existe
+	    Cliente clienteExistente = clienteService.buscarPorCedula(cliente.getCedula());
+	    if (clienteExistente != null) {
+	        return new ResponseEntity<>("La cédula ya existe", HttpStatus.CONFLICT);
+	    }
+ 
+	    // Guardar el nuevo cliente
+	    cliente.setRegistro("C");
+	    clienteService.guardar(cliente);
+	    HttpHeaders cabeceras = new HttpHeaders();
+		cabeceras.add("mensaje_201", "Corresponde a la agregacion del recurso.");
+		return new ResponseEntity<>(cliente, cabeceras, 201);
+	}
 
 
 
@@ -90,20 +101,28 @@ public ResponseEntity<Cliente> actualizar(@RequestBody Cliente cliente, @PathVar
   
 
     // http://localhost:8080/API/v1.0/Budget/clientes/{cedula}
-    @PutMapping(path = "/{cedula}", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Cliente> actualizarPorCedula(@RequestBody Cliente cliente, @PathVariable String cedula) {
-        Cliente clienteExistente = clienteService.buscarPorCedula(cedula);
-        if (clienteExistente == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        cliente.setId(clienteExistente.getId());
-        cliente.setCedula(cedula);
-        cliente.setRegistro("Cliente (C)");
-        clienteService.actualizar(cliente);
-        HttpHeaders cabeceras = new HttpHeaders();
-        cabeceras.add("mensaje_238", "Corresponde a la actualizacion del recurso.");
-        return new ResponseEntity<>(cliente, cabeceras, 238);
-    }
+    @PutMapping(path = "/cedula/{cedula}", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Object> actualizarPorCedula(@RequestBody Cliente cliente, @PathVariable String cedula) {
+	    // Verificar si la cédula ingresada es de 10 caracteres
+	    if (cedula.length() != 10) {
+	        return new ResponseEntity<>("La cédula debe tener 10 caracteres", HttpStatus.BAD_REQUEST);
+	    }
+ 
+	    // Buscar el cliente existente por cédula
+	    Cliente clienteExistente = clienteService.buscarPorCedula(cedula);
+	    if (clienteExistente == null) {
+	        return new ResponseEntity<>("Cliente no encontrado", HttpStatus.NOT_FOUND);
+	    }
+ 
+	    cliente.setRegistro("C");
+	    clienteExistente.setRegistro("C");
+ 
+	    // Guardar el cliente actualizado
+	    clienteService.actualizar(clienteExistente);
+	    HttpHeaders cabeceras = new HttpHeaders();
+	    cabeceras.add("mensaje_238", "Corresponde a la actualizacion del recurso.");
+	    return new ResponseEntity<>(clienteExistente, cabeceras, 238);
+	}
 
 	// http://localhost:8082/API/v1.0/Concesionario/clientes/id/{id}
     @GetMapping(path = "/id/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -117,39 +136,5 @@ public ResponseEntity<Cliente> actualizar(@RequestBody Cliente cliente, @PathVar
 
 	
 
-		// *******************
-		/*
-		 * @Autowired IClienteService clienteService;
-		 * 
-		 * @Autowired IReservacionService reservacionService;
-		 * 
-		 * 
-		 * //http://localhost:8080/API/v1.0/Budget/clientes
-		 * 
-		 * @PostMapping(path="/menta", produces = MediaType.APPLICATION_JSON_VALUE,
-		 * consumes = MediaType.APPLICATION_JSON_VALUE) public ResponseEntity<Cliente>
-		 * agregar(@RequestBody Cliente cliente) { this.service.guardar(cliente);
-		 * cliente.setRegistro("Cliente (C)"); HttpHeaders cabeceras = new
-		 * HttpHeaders(); cabeceras.add("mensaje_201",
-		 * "Corresponde a la agregacion del recurso"); return new
-		 * ResponseEntity<>(cliente,cabeceras,201 );
-		 * 
-		 * }
-		 * 
-		 * //http://localhost:8080/API/v1.0/Budget/clientes/6
-		 * 
-		 * @PutMapping(path = "/{cedula}", produces = MediaType.APPLICATION_JSON_VALUE,
-		 * consumes = MediaType.APPLICATION_JSON_VALUE) public ResponseEntity<Cliente>
-		 * actualizar(@RequestBody Cliente cliente, @PathVariable String cedula) {
-		 * Cliente clienteExistente = clienteService.buscarPorCedula(cedula); if
-		 * (clienteExistente == null) { return new
-		 * ResponseEntity<>(HttpStatus.NOT_FOUND); }
-		 * cliente.setId(clienteExistente.getId()); cliente.setCedula(cedula);
-		 * cliente.setRegistro("Cliente (C)"); clienteService.actualizar(cliente);
-		 * HttpHeaders cabeceras = new HttpHeaders(); cabeceras.add("mensaje_238",
-		 * "Corresponde a la actualizacion del recurso."); return new
-		 * ResponseEntity<>(cliente,cabeceras,238);
-		 * 
-		 * }
-		 */
+		
 }

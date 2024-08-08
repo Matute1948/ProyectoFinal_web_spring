@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.api.repository.IClienteRepository;
@@ -77,8 +78,12 @@ public class ClienteServiceImpl implements IClienteService{
 	@Override
 	@Transactional(value = TxType.REQUIRED)
 	public Cliente buscarPorCedula(String cedula) {
-
-		return this.repository.seleccionarPorCedula(cedula);
+ 
+		try {
+	        return this.repository.seleccionarPorCedula(cedula);
+	    } catch (EmptyResultDataAccessException e) {
+	        return null;
+	    }
 	}
 
 	@Override
